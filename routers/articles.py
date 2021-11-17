@@ -7,7 +7,7 @@ from schemas.article_schema import Blog, DisplayBlog
 router = APIRouter()
 
 
-@router.post("blog", status_code=status.HTTP_201_CREATED)
+@router.post("/blog", status_code=status.HTTP_201_CREATED)
 def create_blog(request:Blog, db: Session = Depends(get_db)):
     new_blog = models.Articles(
         title=request.title,
