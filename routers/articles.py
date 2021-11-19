@@ -4,14 +4,22 @@ from db import models
 from db.db_setup import get_db
 from sqlalchemy.orm import Session
 from schemas.article_schema import Blog, DisplayBlog
+
+
 router = APIRouter()
 
 
-@router.post("/blog", status_code=status.HTTP_201_CREATED)
-def create_blog(request:Blog, db: Session = Depends(get_db)):
+@router.post("/{creator_id}/blog", status_code=status.HTTP_201_CREATED,
+            response_model=DisplayBlog)
+def create_blog(creator_id:int, request:Blog, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == creator_id)
+    if not user.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                    detail=f"user with id {id} doesn't exist")
     new_blog = models.Articles(
         title=request.title,
-        body=request.body
+        body=request.body,
+        creator_id= creator_id
     )
     db.add(new_blog)
     db.commit() 
@@ -25,7 +33,7 @@ def get_all_articles(db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}/blog", status_code=status.HTTP_200_OK)
-def delete_blog(id, db: Session= Depends(get_db)):
+def delete_blog(id: int, db: Session= Depends(get_db)):
     blog= db.query(models.Articles).filter(models.Articles.id ==id)
     if not blog.first():
        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -38,7 +46,7 @@ def delete_blog(id, db: Session= Depends(get_db)):
 
 
 @router.put("/{id}/blog", status_code=status.HTTP_202_ACCEPTED)
-def update_blog(id, request:Blog, db: Session= Depends(get_db)):
+def update_blog(id:int, request:Blog, db: Session= Depends(get_db)):
     blog= db.query(models.Articles).filter(models.Articles.id == id)
     if not blog.first(): 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -52,7 +60,7 @@ def update_blog(id, request:Blog, db: Session= Depends(get_db)):
 
 
 @router.get("/{id}/blog", responses={200:{"model":DisplayBlog}})
-def single_blog(id, db: Session= Depends(get_db)):
+def single_blog(id:int, db: Session= Depends(get_db)):
     blog = db.query(models.Articles).filter(
         models.Articles.id == id).first()
     

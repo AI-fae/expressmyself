@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 
 class User(Base):
     __tablename__ = "users"
+
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
@@ -19,6 +20,6 @@ class Articles(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
     body = Column(String)
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    creator_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     owner = relationship("User", back_populates="articles")
     created_at: str = str(datetime.now())
