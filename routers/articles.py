@@ -15,7 +15,7 @@ def create_blog(creator_id:int, request:Blog, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == creator_id)
     if not user.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                    detail=f"user with id {id} doesn't exist")
+                    detail=f"user with id {creator_id} doesn't exist")
     new_blog = models.Articles(
         title=request.title,
         body=request.body,
@@ -29,8 +29,8 @@ def create_blog(creator_id:int, request:Blog, db: Session = Depends(get_db)):
 
 @router.get("/all_blogs", responses={200:{"model":DisplayBlog}})
 def get_all_articles(db: Session = Depends(get_db)):
-    return(db.query(models.Articles).all())
-
+    blogs = (db.query(models.Articles).all())
+    return blogs
 
 @router.delete("/{id}/blog", status_code=status.HTTP_200_OK)
 def delete_blog(id: int, db: Session= Depends(get_db)):
@@ -59,7 +59,7 @@ def update_blog(id:int, request:Blog, db: Session= Depends(get_db)):
                             status_code=status.HTTP_202_ACCEPTED)
 
 
-@router.get("/{id}/blog", responses={200:{"model":DisplayBlog}})
+@router.get("/{id}/blog", responses={200:{"model":DisplayBlog}}, response_model=DisplayBlog)
 def single_blog(id:int, db: Session= Depends(get_db)):
     blog = db.query(models.Articles).filter(
         models.Articles.id == id).first()

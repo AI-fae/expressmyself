@@ -7,28 +7,16 @@ class Blog(BaseModel):
     body: str
     created_at: str = str(datetime.now())
 
-    class Config():
-        orm_mode = True
-
-
-class User(BaseModel):
-    username: str
-    email: str
-    password: str
+class BlogCreator(BaseModel):
+    username:str
     
-
-class DisplayUser(BaseModel):
-    username: str
-    email: str  
-
     class Config():
         orm_mode = True
-
 
 class DisplayBlog(BaseModel):
     title:str
     body:str
-    owner_id: DisplayUser
+    owner: BlogCreator
 
     class Config():
         orm_mode = True

@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 fastapi = {extras = ["all"], version = "*"}
 sqlalchemy = "*"
+jose = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
 
 [dev-packages]
 
