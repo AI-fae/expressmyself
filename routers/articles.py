@@ -4,14 +4,14 @@ from db import models
 from db.db_setup import get_db
 from sqlalchemy.orm import Session
 from schemas.article_schema import Blog, DisplayBlog
-
+from dependencies.oauth2 import get_current_user
 
 router = APIRouter()
 
 
 @router.post("/{creator_id}/blog", status_code=status.HTTP_201_CREATED,
             response_model=DisplayBlog)
-def create_blog(creator_id:int, request:Blog, db: Session = Depends(get_db)):
+def create_blog(creator_id:int, request:Blog, db: Session = Depends(get_db), current_user: Blog = Depends(get_current_user)):
     user = db.query(models.User).filter(models.User.id == creator_id)
     if not user.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
@@ -27,13 +27,13 @@ def create_blog(creator_id:int, request:Blog, db: Session = Depends(get_db)):
     return new_blog
 
 
-@router.get("/all_blogs", responses={200:{"model":DisplayBlog}})
-def get_all_articles(db: Session = Depends(get_db)):
+@router.get("/all_blogs", responses={200:{"model":Blog}})
+def get_all_articles(db: Session = Depends(get_db), current_user: Blog = Depends(get_current_user)):
     blogs = (db.query(models.Articles).all())
     return blogs
 
 @router.delete("/{id}/blog", status_code=status.HTTP_200_OK)
-def delete_blog(id: int, db: Session= Depends(get_db)):
+def delete_blog(id: int, db: Session= Depends(get_db), current_user: Blog = Depends(get_current_user)):
     blog= db.query(models.Articles).filter(models.Articles.id ==id)
     if not blog.first():
        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -46,7 +46,7 @@ def delete_blog(id: int, db: Session= Depends(get_db)):
 
 
 @router.put("/{id}/blog", status_code=status.HTTP_202_ACCEPTED)
-def update_blog(id:int, request:Blog, db: Session= Depends(get_db)):
+def update_blog(id:int, request:Blog, db: Session= Depends(get_db), current_user: Blog = Depends(get_current_user)):
     blog= db.query(models.Articles).filter(models.Articles.id == id)
     if not blog.first(): 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -60,7 +60,7 @@ def update_blog(id:int, request:Blog, db: Session= Depends(get_db)):
 
 
 @router.get("/{id}/blog", responses={200:{"model":DisplayBlog}}, response_model=DisplayBlog)
-def single_blog(id:int, db: Session= Depends(get_db)):
+def single_blog(id:int, db: Session= Depends(get_db), current_user: Blog = Depends(get_current_user)):
     blog = db.query(models.Articles).filter(
         models.Articles.id == id).first()
     
