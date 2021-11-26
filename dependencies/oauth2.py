@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 from db import models, db_setup
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(db_setup.get_db)):
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
+async def get_current_user(token: str = Depends(oauth2_scheme), 
+    db: Session = Depends(db_setup.get_db)):
     """fetches the details of the user that is being authenticated.
 
     fetches the user details from the database. 

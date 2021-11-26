@@ -38,8 +38,7 @@ def create_blog(creator_id:int, request:Articles,
     db.add(new_blog)
     db.commit() 
     db.refresh(new_blog)
-    return JSONResponse(data=new_blog, status_code=status.HTTP_201_CREATED)
-
+    return new_blog
 
 @router.get("/all_articles", responses={200:{"model":Articles}})
 def get_all_articles(db: Session = Depends(get_db),
@@ -54,9 +53,8 @@ def get_all_articles(db: Session = Depends(get_db),
     blogs = (db.query(models.Articles).all())
     return blogs
 
-
 @router.delete("/{id}/article", status_code=status.HTTP_200_OK)
-def delete_blog(id: int, db: Session= Depends(get_db), 
+def delete_article(id: int, db: Session= Depends(get_db), 
                 current_user: Articles = Depends(get_current_user)):
     """deletes an article with id {id}.
     Args:
@@ -81,7 +79,7 @@ def delete_blog(id: int, db: Session= Depends(get_db),
 
 
 @router.put("/{id}/article", status_code=status.HTTP_202_ACCEPTED)
-def update_blog(id:int, request:Articles, db: Session= Depends(get_db),
+def update_article(id:int, request:Articles, db: Session= Depends(get_db),
                  current_user: Articles = Depends(get_current_user)):
     """enables editing of and article with id {id}.
     Args:
@@ -108,8 +106,8 @@ def update_blog(id:int, request:Articles, db: Session= Depends(get_db),
 
 @router.get("/{id}/article", responses={200:{"model":DisplayArticle}}, 
                 response_model=DisplayArticle)
-def single_blog(id:int, db: Session= Depends(get_db), 
-                current_user: Blog = Depends(get_current_user)):
+def single_article(id:int, db: Session= Depends(get_db), 
+                current_user: Articles = Depends(get_current_user)):
     """fetches a single article with id {id}.
     Args:
         id (str): A unique identifier of an of the article object 
