@@ -2,21 +2,21 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import List
 
-class Blog(BaseModel):
+class Articles(BaseModel):
     title: str
     body: str
     created_at: str = str(datetime.now())
 
-class BlogCreator(BaseModel):
+class ArticleCreator(BaseModel):
     username:str
     
     class Config():
         orm_mode = True
 
-class DisplayBlog(BaseModel):
+class DisplayArticle(BaseModel):
     title:str
     body:str
-    owner: BlogCreator
+    owner: ArticleCreator
 
     class Config():
         orm_mode = True

@@ -13,6 +13,9 @@ SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 Base = declarative_base()
 
 def get_db():
+    """
+    serves as the interface for interacting with the database
+    """
     db = SessionLocal()
     try:
         yield db

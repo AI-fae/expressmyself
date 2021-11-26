@@ -5,6 +5,9 @@ from sqlalchemy.orm import relationship
 
 
 class User(Base):
+    """
+    Describes the table structure of the user model in the database
+    """
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -16,6 +19,9 @@ class User(Base):
     created_at: str = str(datetime.now())
 
 class Articles(Base):
+    """
+    Describes the table structure fo the articles created by users.
+    """
     __tablename__ = "articles"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)

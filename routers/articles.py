@@ -3,15 +3,29 @@ from fastapi.responses import JSONResponse
 from db import models
 from db.db_setup import get_db
 from sqlalchemy.orm import Session
-from schemas.article_schema import Blog, DisplayBlog
+from schemas.article_schema import Articles, DisplayArticle
 from dependencies.oauth2 import get_current_user
 
 router = APIRouter()
 
 
-@router.post("/{creator_id}/blog", status_code=status.HTTP_201_CREATED,
-            response_model=DisplayBlog)
-def create_blog(creator_id:int, request:Blog, db: Session = Depends(get_db), current_user: Blog = Depends(get_current_user)):
+@router.post("/{creator_id}/article", 
+            status_code=status.HTTP_201_CREATED,
+            response_model=DisplayArticle)
+def create_blog(creator_id:int, request:Articles, 
+                db: Session = Depends(get_db), 
+                current_user: Articles = Depends(get_current_user)):
+
+    """Creates a new article and returns details of that article.
+    Args:
+        creator_id (str): A unique identifier of an of the creator's object in the database
+        db (Session): The sqlite database for storing the article object
+        current_user: An authenticator that validates the article creator
+    Returns:
+        HTTP_201_CREATED (new_blog): {key value pair of new article info}
+    Raises
+       HTTP_404_NOT_FOUND: creator_id not found in the User table
+    """
     user = db.query(models.User).filter(models.User.id == creator_id)
     if not user.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
@@ -24,20 +38,41 @@ def create_blog(creator_id:int, request:Blog, db: Session = Depends(get_db), cur
     db.add(new_blog)
     db.commit() 
     db.refresh(new_blog)
-    return new_blog
+    return JSONResponse(data=new_blog, status_code=status.HTTP_201_CREATED)
 
 
-@router.get("/all_blogs", responses={200:{"model":Blog}})
-def get_all_articles(db: Session = Depends(get_db), current_user: Blog = Depends(get_current_user)):
+@router.get("/all_articles", responses={200:{"model":Articles}})
+def get_all_articles(db: Session = Depends(get_db),
+                     current_user: Articles = Depends(get_current_user)):
+    """fetches all articles stored in the database.
+    Args:
+        db (Session): The sqlite database for storing the article object
+        current_user: An authenticator that validates the article creator
+    Returns:
+        HTTP_201_CREATED (new_blog): {key value pair of new article info}
+    """
     blogs = (db.query(models.Articles).all())
     return blogs
 
-@router.delete("/{id}/blog", status_code=status.HTTP_200_OK)
-def delete_blog(id: int, db: Session= Depends(get_db), current_user: Blog = Depends(get_current_user)):
+
+@router.delete("/{id}/article", status_code=status.HTTP_200_OK)
+def delete_blog(id: int, db: Session= Depends(get_db), 
+                current_user: Articles = Depends(get_current_user)):
+    """deletes an article with id {id}.
+    Args:
+        id (str): A unique identifier of an of the article object 
+            in the database to be deleted
+        db (Session): The sqlite database for storing the article object
+        current_user: An authenticator that validates the article creator
+    Returns:
+        HTTP_201_CREATED (new_blog): {key value pair of new article info}.
+    Raises
+       HTTP_404_NOT_FOUND: article does not exist
+    """
     blog= db.query(models.Articles).filter(models.Articles.id ==id)
     if not blog.first():
        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"blog with id {id} doesn't exist")
+                    detail=f"article with id {id} doesn't exist")
 
     blog.delete(synchronize_session=False)
     db.commit()
@@ -45,8 +80,20 @@ def delete_blog(id: int, db: Session= Depends(get_db), current_user: Blog = Depe
                  status_code=status.HTTP_200_OK)
 
 
-@router.put("/{id}/blog", status_code=status.HTTP_202_ACCEPTED)
-def update_blog(id:int, request:Blog, db: Session= Depends(get_db), current_user: Blog = Depends(get_current_user)):
+@router.put("/{id}/article", status_code=status.HTTP_202_ACCEPTED)
+def update_blog(id:int, request:Articles, db: Session= Depends(get_db),
+                 current_user: Articles = Depends(get_current_user)):
+    """enables editing of and article with id {id}.
+    Args:
+        id (str): A unique identifier of an of the article object 
+            in the database to be deleted
+        db (Session): The sqlite database for storing the article object
+        current_user: An authenticator that validates the article creator
+    Returns:
+        HTTP_202_ACCEPTED: update successful
+    Raises
+       HTTP_404_NOT_FOUND: article does not exist
+    """
     blog= db.query(models.Articles).filter(models.Articles.id == id)
     if not blog.first(): 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -59,8 +106,21 @@ def update_blog(id:int, request:Blog, db: Session= Depends(get_db), current_user
                             status_code=status.HTTP_202_ACCEPTED)
 
 
-@router.get("/{id}/blog", responses={200:{"model":DisplayBlog}}, response_model=DisplayBlog)
-def single_blog(id:int, db: Session= Depends(get_db), current_user: Blog = Depends(get_current_user)):
+@router.get("/{id}/article", responses={200:{"model":DisplayArticle}}, 
+                response_model=DisplayArticle)
+def single_blog(id:int, db: Session= Depends(get_db), 
+                current_user: Blog = Depends(get_current_user)):
+    """fetches a single article with id {id}.
+    Args:
+        id (str): A unique identifier of an of the article object 
+            in the database to be deleted
+        db (Session): The sqlite database for storing the article object
+        current_user: An authenticator that validates the article creator
+    Returns:
+        HTTP_200_OK: successful
+    Raises
+       HTTP_404_NOT_FOUND: article does not exist
+    """
     blog = db.query(models.Articles).filter(
         models.Articles.id == id).first()
     

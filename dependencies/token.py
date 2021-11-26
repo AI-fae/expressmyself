@@ -8,6 +8,13 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 async def create_access_token(data: dict):
+    """creates authentication token for a user.
+    Args:
+        data (dict): A key value pair of user infomation to be authenticated
+
+    Returns:
+        encoded_jwt: an encoded token used to provide user access
+    """
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
@@ -16,6 +23,17 @@ async def create_access_token(data: dict):
 
 
 async def verify_token(token: str, credentials_exception):
+    """validates access token 
+    Args:
+        token (str): An OAuth2password bearer obtained from the login url.
+        credentials_exception: exception details to be raised if user
+             credentails is not valid
+    Returns:
+        token_data: an object containing user data
+    Raises
+        HTTP_401_UNAUTHORIZED: invalid credentials
+        JWTError: invalid token
+    """
     
     try:
         payload =jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
